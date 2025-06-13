@@ -1,0 +1,67 @@
+re-progress_bar/
+├── re-progress_bar.php                # Główny plik pluginu: nagłówek WP, inicjalizacja bootstrapu
+├── composer.json                      # Definicja zależności PHP i autoload PSR-4
+├── uninstall.php                      # Logika czystego odinstalowania: usuwanie opcji i transients
+├── .gitignore                         # Lista plików/katalogów ignorowanych przez Git
+├── .gitattributes                     # Ustawienia atrybutów Git (np. konwersja EOL)
+├── .editorconfig                      # Konfiguracja edytora: odstępy, encoding, końce linii
+├── phpcs.xml.dist                     # Reguły PHP_CodeSniffer (PSR-12)
+├── phpunit.xml.dist                   # Konfiguracja PHPUnit dla testów PHP
+├── eslint.config.js                   # Reguły ESLint dla kodu JS
+├── jest.config.js                     # Konfiguracja testów JavaScript (Jest)
+├── package.json                       # Skrypty i zależności front-end (npm)
+├── webpack.config.js                  # Konfiguracja budowania ES6/SCSS ➔ minifikacja
+├── README.md                          # Instrukcja techniczna: instalacja, użycie, API
+├── readme.txt                         # Metadane dla WordPress.org: opis, changelog
+├── languages/
+│   └── re-progress_bar.pot            # Szablon pliku tłumaczeń (gettext)
+├── vendor/                            # Katalog zależności Composer (ignorowany w repo)
+├── includes/
+│   ├── autoload.php                   # Fallback autoloader, gdy brak Composera
+│   ├── class-bootstrap.php            # Klasa Bootstrap: rejestruje hooki i moduły
+│   ├── admin/
+│   │   ├── class-settings.php         # Rejestracja ustawień przez Settings API
+│   │   ├── class-admin-assets.php     # Enqueue CSS/JS w panelu admina
+│   │   └── views/
+│   │       ├── settings-page.php      # Szablon strony ustawień pluginu
+│   │       └── metabox-recommendations.php  # Widok metaboxu rekomendacji w edycji posta
+│   ├── frontend/
+│   │   ├── class-progress-tracker.php # Logika śledzenia scrolla i obliczania progresu
+│   │   ├── class-popup.php            # Implementacja wyzwalaczy i render popupu
+│   │   ├── class-recommendations.php  # Algorytm dobierania i cache’owania rekomendacji
+│   │   └── class-assets.php           # Enqueue front-end CSS i JS
+│   ├── integrations/
+│   │   ├── elementor/
+│   │   │   └── class-elementor-widget.php  # Rejestracja widgetu Elementor
+│   │   ├── wpbakery/
+│   │   │   └── class-wpbakery-shortcode.php # Mapowanie i render shortcode WPBakery
+│   │   └── gutenberg/
+│   │       ├── block.json             # Metadane bloku Gutenberg
+│   │       ├── index.js               # Skrypt React dla edytora Gutenberg
+│   │       ├── editor.css             # Style bloku w edytorze
+│   │       └── style.css              # Style bloku na froncie
+│   └── api/
+│       ├── class-rest-controller.php  # Definicja tras i obsługa REST API v1
+│       └── index.php                  # Loader przestrzeni nazw API
+├── assets/
+│   ├── css/
+│   │   ├── progress-bar.css           # Style paska postępu
+│   │   ├── popup.css                  # Style okna popup
+│   │   └── recommendations.css        # Style listy rekomendacji
+│   ├── js/
+│   │   ├── progress-bar.js            # Skrypt IntersectionObserver i eventy
+│   │   ├── popup.js                   # Skrypt wyzwalaczy popupu
+│   │   └── recommendations.js         # Skrypt ładowania rekomendacji
+│   └── images/
+│       └── placeholder.svg            # Obraz zastępczy dla rekomendacji
+├── build/                             # Zminifikowane pliki produkcyjne (output webpack)
+└── tests/
+    ├── php/
+    │   ├── bootstrap.php              # Bootstrap testów PHPUnit (WP test utils)
+    │   ├── test-progress-tracker.php  # Testy jednostkowe modułu progress-tracker
+    │   ├── test-popup.php             # Testy jednostkowe modułu popup
+    │   └── test-recommendations.php   # Testy jednostkowe modułu rekomendacji
+    └── js/
+        ├── progress-tracker.test.js   # Testy logiki JS progress-tracker
+        ├── popup.test.js              # Testy logiki JS popupu
+        └── recommendations.test.js    # Testy logiki JS rekomendacji
