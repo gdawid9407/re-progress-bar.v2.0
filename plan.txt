@@ -1,111 +1,121 @@
 1. Przegląd specyfikacji i założeń
-   * Przeczytać „Podsumowanie” w specyfikacji, by zidentyfikować trzy główne moduły: dynamiczny pasek postępu czytania, inteligentny popup „Czytaj więcej” oraz system rekomendacji .
-   * Wypisać wszystkie wymagania funkcjonalne:
-       * Dynamiczne śledzenie pozycji scrolla i obliczanie procentu przeczytanego tekstu .
-       * Wyzwalacze popupu: osiągnięcie % progresu, czas >60 s, zmiana kierunku scrolla .
-       * Dobór artykułów w rekomendacjach według kryteriów (popularność, tagi, data) .
-   * Wyodrębnić wymagania niefunkcjonalne:
-       * Kompatybilność z page builderami (Elementor, WP Bakery, Gutenberg, natywny edytor) .
-       * Optymalizacja wydajności i bezpieczeństwo: lazy loading, cache’owanie, sanitizacja danych, pomiar CLS/LCP .
-   * Sprawdzić wymagania środowiskowe: WordPress ≥5.6, PHP ≥7.4, MySQL ≥5.7, obsługa ES6+ .
+   1.1 Przeczytać “Podsumowanie” w specyfikacji, zidentyfikować moduły: dynamiczny pasek postępu, popup “Czytaj więcej”, system rekomendacji
+   1.2 Wypisać wymagania funkcjonalne:
+   1.2.1 Dynamiczne śledzenie scrolla i obliczanie procentu czytanego tekstu
+   1.2.2 Wyzwalacze popupu: osiągnięcie progu %, czas > 60 s, zmiana kierunku scrolla
+   1.2.3 Dobór artykułów według popularności, tagów, daty
+   1.3 Wyodrębnić wymagania niefunkcjonalne:
+   1.3.1 Kompatybilność z Elementor, WP Bakery, Gutenberg, edytorem natywnym
+   1.3.2 Optymalizacja: lazy loading, cache, sanitizacja, pomiar CLS/LCP
+   1.4 Sprawdzić środowisko: WP ≥ 5.6, PHP ≥ 7.4, MySQL ≥ 5.7, ES6+
+
 2. Przygotowanie środowiska deweloperskiego
-   * Utworzyć i zainicjować repozytorium Git o nazwie re-progress_bar.
-   * Skonfigurować wersjonowanie semantyczne (SEMVER) oraz plik .gitignore dla WordPress.
-   * Zainstalować lokalną instancję WordPress 5.6+ na XAMPP lub Lando; skonfigurować bazę MySQL 5.7+.
-   * Zainstalować narzędzia:
-       * PHP 7.4+ oraz Composer (do autoloadingu PSR-4).
-       * WP CLI (zarządzanie pluginami i bazą).
-       * ESLint + Prettier dla JS (ES6+) i PHP_CodeSniffer z regułami PSR-12.
-       * PHPUnit (testy jednostkowe PHP) oraz Jest (testy JS).
-   * Utworzyć plik konfiguracyjny CI (GitHub Actions) do automatycznego lintingu i uruchamiania testów.
+   2.1 Utworzyć repozytorium Git re-progress\_bar
+   2.2 Skonfigurować SEMVER i .gitignore dla WordPress
+   2.3 Zainstalować lokalne WP 5.6+ na XAMPP/Lando, bazę MySQL 5.7+
+   2.4 Zainstalować narzędzia:
+   2.4.1 PHP 7.4+ i Composer
+   2.4.2 WP CLI
+   2.4.3 ESLint + Prettier (JS ES6+) i PHP\_CodeSniffer (PSR-12)
+   2.4.4 PHPUnit i Jest
+   2.5 Utworzyć CI (GitHub Actions) do lintingu i testów
+
 3. Inicjalizacja pluginu
-   * Stworzyć główny plik re-progress_bar.php z nagłówkiem pluginu: nazwa, wersja, autor, tekst licencji.
-   * Zarejestrować hook plugins_loaded, w którym załadować autoloader Composer lub własny loader klas.
-   * Zadeklarować namespace ReProgressBar oraz strukturę podstawowych klas:
-       * Bootstrap – inicjalizacja modułów.
-       * Admin\Settings – rejestracja ustawień.
-       * Frontend\ProgressTracker – moduł śledzenia postępu.
-   * Dodawać wszystkie dalsze hooki i filtry w metodzie run() klasy Bootstrap, aby separować logikę.
+   3.1 Stworzyć re-progress\_bar.php z nagłówkiem (nazwa, wersja, autor, licencja)
+   3.2 Zarejestrować hook plugins\_loaded, załadować autoloader (Composer lub własny)
+   3.3 Zadeklarować namespace ReProgressBar i klasy:
+   3.3.1 Bootstrap (inicjalizacja modułów)
+   3.3.2 Admin\Settings (rejestracja ustawień)
+   3.3.3 Frontend\ProgressTracker
+   3.4 Dodać hooki i filtry w metodzie run() klasy Bootstrap
+
 4. Moduł śledzenia postępu (Progress Bar)
-   * Zarejestrować w wp_enqueue_scripts:
-       * Skrypt JS z logiką Intersection Observer.
-       * Styl CSS paska (zmienne dla pozycji, wysokości, kolorów).
-   * W JS wykorzystać API IntersectionObserver lub scroll listener do:
-       * Obliczania procentu przeczytanego tekstu (scrollTop ÷ (documentHeight – viewportHeight)).
-       * Emitowania zdarzeń przekroczenia progu np. reProgressThresholdReached.
-   * Zaimplementować inteligentne pomijanie elementów: nagłówków, stopek i elementów sticky .
-   * Udostępnić w PHP funkcję pomocniczą „get_progress_data()” zwracającą obecny procent, umożliwiającą integrację z popupem i rekomendacjami.
-   * Testować na przykładach stron z różnymi układami (motywy z nagłówkami stałymi, z sidebarami) w celu weryfikacji poprawności działania.
+   4.1 Enqueue w wp\_enqueue\_scripts:
+   4.1.1 Skrypt JS (IntersectionObserver)
+   4.1.2 Styl CSS paska (zmienne pozycji, wysokości, kolorów)
+   4.2 W JS obliczać procent i emitować zdarzenia:
+   4.2.1 Obliczanie procentu (scrollTop ÷ (documentHeight – viewportHeight))
+   4.2.2 Emitowanie reProgressThresholdReached
+   4.3 Ignorować nagłówki, stopki, elementy sticky
+   4.4 Udostępnić w PHP get\_progress\_data()
+   4.5 Testować na różnych motywach i układach
+
 5. Panel administracyjny
-   * Zarejestrować stronę ustawień w hooku admin_menu i skonfigurować ją przez Settings API.
-   * Dodać sekcje i pola konfiguracyjne dla:
-       * Paska postępu: pozycja (góra/dół/niestandardowa), wysokość, kolor podstawowy i tła, przezroczystość, wykluczanie elementów po selektorach CSS, obsługa szablonów i typów postów .
-       * Popupu „Czytaj Więcej”: procentowy próg, czas opóźnienia, kierunek scrolla, konfiguracja czasu (>60 s) oraz edytor WYSIWYG do tworzenia treści pop’upa .
-       * Rekomendacji: wybór trybu algorytmu (automatyczny/ręczny), liczba i układ pozycji, opcja integracji z zewnętrznymi API .
-   * Sanityzować i walidować wszystkie wartości przy zapisie przy użyciu sanitize_text_field, sanitize_hex_color, absint itp.
-6. Popup „Czytaj więcej”
-   * Załadować skrypty i style przez wp_enqueue_script/wp_enqueue_style.
-   * Implementować wyzwalacze:
-       * osiągnięcie zdefiniowanego % progresu,
-       * czas spędzony na stronie (> 60 s),
-       * zmiana kierunku scrolla po powrocie do góry .
-   * Wykorzystać wp_localize_script do przekazania do JS parametrów wyzwalaczy i treści pop’upa.
-   * Udostępnić API JS emitujące zdarzenie re_progress_popup_trigger i umożliwić podpinanie dodatkowych callbacków.
-   * Zaimplementować moduł personalizacji wyglądu i zawartości (tło, czcionki, przyciski, listę kolejnych artykułów) .
+   5.1 Zarejestrować stronę ustawień (admin\_menu, Settings API)
+   5.2 Dodać pola konfiguracyjne:
+   5.2.1 Pasek postępu: pozycja, wysokość, kolory, selektory CSS, typy postów
+   5.2.2 Popup “Czytaj Więcej”: próg %, opóźnienie, kierunek scrolla, edytor WYSIWYG
+   5.2.3 Rekomendacje: tryb, liczba pozycji, układ, integracja API
+   5.3 Sanityzować wartości (sanitize\_text\_field, sanitize\_hex\_color, absint)
+
+6. Popup “Czytaj więcej”
+   6.1 Enqueue skryptów i stylów
+   6.2 Implementować wyzwalacze:
+   6.2.1 Osiągnięcie progu %
+   6.2.2 Czas na stronie > 60 s
+   6.2.3 Zmiana kierunku scrolla po powrocie do góry
+   6.3 Przekazać parametry przez wp\_localize\_script
+   6.4 Emitować re\_progress\_popup\_trigger w JS
+   6.5 Moduł personalizacji wyglądu i zawartości
+
 7. Silnik rekomendacji
-   * Opracować klasę odpowiedzialną za pobieranie propozycji na podstawie:
-       * popularności (liczba wyświetleń/komentarzy),
-       * tagów i kategorii,
-       * daty publikacji .
-   * Wdrążyć cache’owanie wyników przez Transients API lub zewnętrzny store (Redis/Memcached) z TTL konfigurowalnym w panelu .
-   * Udostępnić filtry i hooki (apply_filters('re_progress_recommendations'), do_action('re_progress_after_load')) dla rozszerzalności algorytmu.
-   * Zapewnić fallback do prostego sortowania po dacie, gdy API zewnętrzne jest niedostępne.
+   7.1 Klasa pobierająca propozycje:
+   7.1.1 Popularność (wyświetlenia, komentarze)
+   7.1.2 Tagi i kategorie
+   7.1.3 Data publikacji
+   7.2 Cache’owanie wyników (Transients API/Redis/Memcached)
+   7.3 Filtry i hooki (apply\_filters, do\_action)
+   7.4 Fallback do sortowania po dacie
+
 8. Kompatybilność z Page Builderami
-   * Przeanalizować API każdego buildera: Elementor, WPBakery, Gutenberg, zweryfikować dostępne hooki i klasy .
-   * Elementor:
-       * Zarejestrować widget przez \Elementor\Plugin::instance()->widgets_manager->register_widget_type()
-       * Utworzyć klasę Elementor\Widget_Progress_Bar z metodami get_name(), get_title(), get_icon(), register_controls(), render()
-       * Dodać wsparcie dla Dynamic Tags (metadane progresu)
-   * WPBakery:
-       * Zdefiniować shortcode w callbacku vc_map() ze wszystkimi parametrami paska, popupu i rekomendacji
-       * Utworzyć funkcję renderującą HTML/CSS/JS paska i popupu, odwołującą się do ReProgressBar\Frontend\Assets
-   * Gutenberg:
-       * Napisać blok w React z registerBlockType('re-progress-bar/block', { ... }), uwzględnić atrybuty dla pozycji, kolorów, progów popupu
-       * Enqueue edytorowe i front-endowe skrypty/styles przez enqueue_block_editor_assets i enqueue_block_assets
-   * Fallback:
-       * Zarejestrować globalny shortcode re_progress_bar i podłączyć go do the_content w add_filter('the_content', ...) dla stron bez buildera
+   8.1 Analiza API Elementor, WPBakery, Gutenberg
+   8.2 Elementor:
+   8.2.1 Rejestracja widgetu w widgets\_manager
+   8.2.2 Klasa Widget\_Progress\_Bar (get\_name, get\_title, get\_icon, register\_controls, render)
+   8.3 WPBakery:
+   8.3.1 vc\_map() shortcode
+   8.3.2 Funkcja renderująca HTML/CSS/JS
+   8.4 Gutenberg:
+   8.4.1 registerBlockType blok React
+   8.4.2 Enqueue edytorowych i front-endowych skryptów/style
+   8.5 Fallback: globalny shortcode re\_progress\_bar (filter the\_content)
+
 9. Bezpieczeństwo i optymalizacja
-   * Sanityzacja i eskalacja: każdą wartość z ustawień admina filtrować przez sanitize_text_field, sanitize_hex_color, absint; każdą wartość wyjściową owijać w esc_attr, esc_html, wp_kses_post .
-   * Lazy loading zasobów:
-       * Rejestracja skryptów z wp_register_script(..., [], false, true) i ładowanie tylko na stronach z progres barem
-       * Użycie loading="lazy" dla obrazów w rekomendacjach
-   * Minimalizacja i bundling: zbudować produkcyjną paczkę CSS/JS przez webpack z trybem produkcyjnym (mode: 'production')
-   * Core Web Vitals: wstawić w CI zadanie uruchamiające Lighthouse CI dla metryk CLS i LCP; analizować raport i optymalizować krytyczne CSS/JS
+   9.1 Sanityzacja i eskalacja (sanitize\_text\_field, esc\_attr, esc\_html, wp\_kses\_post)
+   9.2 Lazy loading zasobów:
+   9.2.1 wp\_register\_script(..., true)
+   9.2.2 loading="lazy" dla obrazów
+   9.3 Minifikacja i bundling przez webpack (production mode)
+   9.4 CI z Lighthouse CI dla CLS i LCP
+
 10. Testy i kontrola jakości
-   * Testy jednostkowe PHP:
-       * Utworzyć klasy testowe w tests/php/ rozszerzające WP_UnitTestCase
-       * Testować rejestrację hooków, poprawność obliczeń procentu, sanityzację danych
-   * Testy JavaScript:
-       * W tests/js/ napisać testy funkcji obliczających procent, wyzwalaczy popupu i hooków eventowych za pomocą Jest
-   * Testy manualne:
-       * Sporządzić matrycę testów w różnych motywach (TwentyTwentyFive, Astra, OceanWP) i builderach (Elementor, WPBakery, Gutenberg)
-       * Sprawdzać poprawność paska, popupu, rekomendacji oraz fallback w natywnym edytorze
-   * CI na GitHub Actions:
-       * Workflow uruchamiający: PHP_CodeSniffer (PSR-12), ESLint, PHPUnit, Jest przy każdym pushu i pull requeście
-11.Dokumentacja i przygotowanie do wydania
-   * README.md:
-       * Sekcje: Wprowadzenie, Wymagania, Instalacja, Konfiguracja panelu, Użycie shortcodów/bloku, Przykłady, FAQ
-   * Changelog:
-       * Stosować format Keep a Changelog: wersja, data, dodane, zmienione, usunięte, naprawione
-   * readme.txt:
-       * Krótkie streszczenie, instrukcja instalacji, link do dokumentacji, sekcja „Upgrade Notice”
-   * Pakowanie ZIP:
-       * Zawrzeć główny plik pluginu, includes/, assets/, languages/, readme.txt
-       * Wykluczyć pliki rozwojowe (.gitignore, .editorconfig, tests/, vendor/, build/)
-12.Wskazówki do dalszego rozwoju
-   * Wersjonowanie REST API: wprowadzić stałą REPB_API_VERSION, trasy rejestrować pod /re-progress-bar/v1/... i przygotować migracje pod v2
-   * A/B testing popupów: zintegrować feature flags (np. LaunchDarkly), dodać warunki losowego przydziału użytkowników do wariantów A/B
-   * Analityka zaangażowania:
-       * Emitować eventy JS do dataLayer dla Google Analytics (próg progressu, odsłony popupu, kliknięcia rekomendacji)
-       * Zbierać metryki CTR rekomendacji i średni czas pozostały do scrolla końca artykułu
-       * Przeglądać raporty i optymalizować algorytm rekomendacji na podstawie zebranych danych
+    10.1 Testy PHP (tests/php/):
+    10.1.1 Klasy rozszerzające WP\_UnitTestCase
+    10.1.2 Testy hooków, obliczeń procentu, sanityzacji
+    10.2 Testy JS (tests/js/):
+    10.2.1 Obliczanie procentu
+    10.2.2 Wyzwalacze popupu
+    10.2.3 Hooki eventowe (Jest)
+    10.3 Testy manualne:
+    10.3.1 Matryca testów: motywy, buildery
+    10.3.2 Weryfikacja paska, popupu, rekomendacji, fallback
+    10.4 CI na GitHub Actions: PHP\_CodeSniffer, ESLint, PHPUnit, Jest
+
+11. Dokumentacja i przygotowanie do wydania
+    11.1 README.md:
+    11.1.1 Sekcje: Wprowadzenie, Wymagania, Instalacja, Konfiguracja panelu, Użycie shortcodów/bloku, Przykłady, FAQ
+    11.2 Changelog:
+    11.2.1 Keep a Changelog: wersja, data, dodane, zmienione, usunięte, naprawione
+    11.3 readme.txt:
+    11.3.1 Krótkie streszczenie, instrukcja instalacji, link do dokumentacji, sekcja “Upgrade Notice”
+    11.4 Pakowanie ZIP:
+    11.4.1 Zawrzeć pliki pluginu, includes/, assets/, languages/, readme.txt
+    11.4.2 Wykluczyć .gitignore, .editorconfig, tests/, vendor/, build/
+
+12. Wskazówki do dalszego rozwoju
+    12.1 Wersjonowanie REST API: stała REPB\_API\_VERSION, trasy /v1/, migracje pod v2
+    12.2 A/B testing popupów: feature flags, losowy podział użytkowników
+    12.3 Analityka zaangażowania:
+    12.3.1 Eventy JS do dataLayer (GA)
+    12.3.2 Metryki CTR, czas do końca scrolla
+    12.3.3 Analiza raportów, optymalizacja algorytmu
