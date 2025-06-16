@@ -9,11 +9,17 @@ namespace ReProgressBar;
 
 defined( 'ABSPATH' ) || exit;
 
+use function add_action;
+use function load_plugin_textdomain;
+use function plugin_basename;
+use ReProgressBar\API\RestController;
+use ReProgressBar\Assets;
+use ReProgressBar\Admin\Assets as AdminAssets;
+
 /**
  * Bootstraps all plugin modules.
  */
 final class Bootstrap {
-
     /**
      * Singleton instance.
      *
@@ -33,7 +39,6 @@ final class Bootstrap {
      * Keep heavy logic out of constructor.
      */
     private function __construct() {
-        // Add core plugin modules here.
         $this->modules = [
             'admin_settings'   => new Admin\Settings(),
             'progress_tracker' => new Frontend\ProgressTracker(),
@@ -51,14 +56,30 @@ final class Bootstrap {
     }
 
     /**
-     * Initialise registered modules.
+     * Initialise plugin: load translations, register routes, enqueue assets, then modules.
      */
     public function run(): void {
+        add_action('init', [ $this, 'loadTextDomain' ]);
+        add_action('rest_api_init', [ RestController::class, 'registerRoutes' ]);
+        add_action('wp_enqueue_scripts', [ Assets::class, 'enqueue' ]);
+        add_action('admin_enqueue_scripts', [ AdminAssets::class, 'enqueue' ]);
+
         foreach ( $this->modules as $module ) {
             if ( method_exists( $module, 'run' ) ) {
                 $module->run();
             }
         }
+    }
+
+    /**
+     * Load plugin textdomain for translations.
+     */
+    public function loadTextDomain(): void {
+        load_plugin_textdomain(
+            're-progress-bar',
+            false,
+            dirname( plugin_basename( __DIR__ ) ) . '/languages'
+        );
     }
 
     /** Prevent cloning. */
@@ -69,5 +90,3 @@ final class Bootstrap {
         throw new \Exception( 'Cannot unserialise Bootstrap singleton.' );
     }
 }
-
-

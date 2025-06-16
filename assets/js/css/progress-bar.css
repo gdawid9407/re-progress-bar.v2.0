@@ -1,0 +1,29 @@
+/* File: assets/css/progress-bar.css */
+:root {
+    --progress-bar-height: 4px;
+    --progress-bar-bg: rgba(0, 0, 0, 0.1);
+    --progress-bar-fill: #0073aa;
+    --progress-bar-z: 9999;
+}
+
+#re-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: var(--progress-bar-height);
+    background-color: var(--progress-bar-fill);
+    z-index: var(--progress-bar-z);
+}
+
+/* optional track behind the fill */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--progress-bar-height);
+    background-color: var(--progress-bar-bg);
+    z-index: calc(var(--progress-bar-z) - 1);
+}
