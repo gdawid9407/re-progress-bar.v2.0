@@ -1,34 +1,39 @@
-// File: assets/js/progress-bar.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const bar = document.createElement('div');
     bar.id = 're-progress-bar';
     document.body.prepend(bar);
 
-    const content = document.querySelector('.entry-content, .post-content');
-    if (!content) return;
+    let thresholdReached = false;
 
-    // insert a sentinel at the very bottom of the content
-    const sentinel = document.createElement('div');
-    sentinel.id = 're-progress-sentinel';
-    sentinel.style.position = 'absolute';
-    sentinel.style.top = '100%';
-    content.appendChild(sentinel);
+    // Heights of elements to ignore
+    const headerElems = document.querySelectorAll('header, .site-header, .entry-header');
+    const footerElems = document.querySelectorAll('footer, .site-footer, .entry-footer');
+    const stickyElems = document.querySelectorAll('[class*="sticky"], .is-sticky');
 
-    // thresholds 0%–100% in 1% increments
-    const thresholds = Array.from({ length: 101 }, (_, i) => i / 100);
+    const headerHeight = Array.from(headerElems).reduce((sum, el) => sum + el.offsetHeight, 0);
+    const footerHeight = Array.from(footerElems).reduce((sum, el) => sum + el.offsetHeight, 0);
+    const stickyHeight = Array.from(stickyElems).reduce((sum, el) => sum + el.offsetHeight, 0);
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.target.id === 're-progress-sentinel') {
-                const percent = Math.round(entry.intersectionRatio * 100);
-                bar.style.width = percent + '%';
-            }
-        });
-    }, {
-        root: null,
-        rootMargin: '0px',
-        threshold: thresholds
+    window.addEventListener('scroll', () => {
+        const scrollTop      = document.documentElement.scrollTop || document.body.scrollTop;
+        const docHeight      = document.documentElement.scrollHeight;
+        const viewportHeight = window.innerHeight;
+
+        // Compute scrollable area minus ignored elements
+        const scrollableArea = docHeight - viewportHeight - headerHeight - footerHeight - stickyHeight;
+        const percent        = Math.min(
+            Math.round(scrollTop / scrollableArea * 100),
+            100
+        );
+
+        bar.style.width = percent + '%';
+
+        if (!thresholdReached && percent >= ReProgressBarSettings.progress_threshold) {
+            thresholdReached = true;
+            document.dispatchEvent(
+                new CustomEvent('reProgressThresholdReached', { detail: { percent } })
+            );
+        }
     });
-
-    observer.observe(sentinel);
 });
